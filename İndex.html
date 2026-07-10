@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAD BANKACILIK</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #2563eb; --primary-dark: #1d4ed8; --success: #10b981; --danger: #ef4444; --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #1f2937; --text-muted: #6b7280; --sidebar-bg: #111827; --sidebar-text: #f9fafb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; min-height: 100vh; }
+        
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, #1e3a8a, #111827); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: rgba(255, 255, 255, 0.95); padding: 40px 30px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px rgba(0,0,0,0.3); text-align: center; }
+        .login-icon { width: 70px; height: 70px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px auto; }
+        
+        #app-container { display: none; width: 100%; min-height: 100vh; }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .btn-full { width: 100%; padding: 12px; font-weight: bold; margin-top:10px; }
+        
+        #sidebar { width: 280px; background-color: var(--sidebar-bg); color: var(--sidebar-text); height: 100vh; position: fixed; left: -280px; top: 0; transition: left 0.3s ease; z-index: 1000; overflow-y: auto; }
+        #sidebar.active { left: 0; }
+        .user-profile { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .avatar { width: 80px; height: 80px; background-color: var(--primary); border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; color: white; border: 2px solid #3b82f6; }
+        .menu { list-style: none; padding: 20px 0; }
+        .menu li a { display: block; padding: 15px 20px; color: var(--sidebar-text); text-decoration: none; }
+        
+        #main-content { flex: 1; width: 100%; }
+        .header-bar { background: var(--card-bg); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .modern-card { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-icon"><i class="fas fa-lock"></i></div>
+            <h2>AAD BANKACILIK Girişi</h2>
+            <input type="text" id="username-input" class="btn-full" placeholder="Kullanıcı Adı" style="background:#f3f4f6; color:black; padding:12px; border:1px solid #ccc;">
+            <input type="password" id="password-input" class="btn-full" placeholder="Şifre" style="background:#f3f4f6; color:black; padding:12px; border:1px solid #ccc;">
+            <button class="btn btn-full" onclick="handleLogin()">Giriş Yap</button>
+        </div>
+    </div>
+
+    <div id="app-container">
+        <nav id="sidebar">
+            <div class="sidebar-header"><h2>AAD BANKACILIK</h2></div>
+            <div class="user-profile">
+                <div class="avatar" id="profile-avatar">AAD</div>
+                <p>Ahmet Alihan Doğan</p>
+            </div>
+            <ul class="menu">
+                <li><a href="#" onclick="showPage('dashboard')"><i class="fas fa-home"></i> Ana Panel</a></li>
+                <li><a href="#" onclick="openModal('transaction-modal')"><i class="fas fa-plus-circle"></i> Gelir / Gider Ekle</a></li>
+                <li><a href="#" onclick="showPage('cash-page')"><i class="fas fa-money-bill-wave"></i> Nakit İşlemleri</a></li>
+                <li><a href="#" onclick="showPage('card-page')"><i class="fas fa-credit-card"></i> Kart İşlemleri</a></li>
+                <li><a href="#" onclick="showPage('all-transactions-page')"><i class="fas fa-list"></i> Tüm İşlemler</a></li>
+                <li><a href="#" onclick="handleLogout()" style="color:red;"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a></li>
+            </ul>
+        </nav>
+        <main id="main-content">
+            <div class="header-bar">
+                <h1 id="page-title">Ana Panel</h1>
+            </div>
+            <div class="container">
+                <section id="dashboard" class="page active">
+                    <div class="modern-card">
+                        <h3>Güncel Bakiye</h3>
+                        <h2 id="total-balance">0 TL</h2>
+                    </div>
+                </section>
+                <section id="cash-page" class="page">
+                    <div class="modern-card">
+                        <h3>Nakit İşlemleri</h3>
+                        <table id="cash-table"><tbody></tbody></table>
+                    </div>
+                </section>
+                <section id="card-page" class="page">
+                    <div class="modern-card">
+                        <h3>Kart İşlemleri</h3>
+                        <table id="card-table"><tbody></tbody></table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const CORRECT_USER = "ahmet";
+        const CORRECT_PASS = "1234";
+
+        function handleLogin() {
+            if(document.getElementById('username-input').value === CORRECT_USER && document.getElementById('password-input').value === CORRECT_PASS) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                updateDashboard();
+            } else { alert("Hatalı giriş!"); }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById('page-title').innerText = pageId.replace('-page', '').toUpperCase();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Basit Bakiye Mantığı
+        function updateDashboard() {
+            let balance = localStorage.getItem('balance') || 0;
+            document.getElementById('total-balance').innerText = balance + " TL";
+        }
+    </script>
+</body>
+</html>
+
