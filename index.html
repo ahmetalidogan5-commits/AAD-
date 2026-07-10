@@ -2,80 +2,63 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AAD BANKACILIK</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #2563eb; --sidebar-bg: #111827; --bg-color: #f3f4f6; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: var(--bg-color); display: flex; min-height: 100vh; }
-        
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111827; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: white; padding: 40px; border-radius: 16px; width: 350px; text-align: center; }
-        
-        #app-container { display: none; width: 100%; display: flex; }
-        #sidebar { width: 280px; background: var(--sidebar-bg); color: white; height: 100vh; }
-        .menu { list-style: none; padding: 20px; }
-        .menu li a { display: block; padding: 15px; color: white; text-decoration: none; }
-        
-        #main-content { flex: 1; padding: 20px; }
+        :root { --primary: #2563eb; --sidebar: #111827; }
+        body { font-family: sans-serif; background: #f3f4f6; display: flex; height: 100vh; }
+        #app { display: flex; width: 100%; }
+        #sidebar { width: 250px; background: var(--sidebar); color: white; padding: 20px; }
+        .menu-item { padding: 15px; color: white; text-decoration: none; display: block; }
+        #content { flex: 1; padding: 20px; overflow-y: auto; }
         .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .page { display: none; }
-        .page.active { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-card">
+    <div id="login-box" style="position:fixed; z-index:999; width:100%; height:100%; background:#111827; display:flex; align-items:center; justify-content:center;">
+        <div style="background:white; padding:40px; border-radius:15px; width:300px; text-align:center;">
             <h2>AAD BANKACILIK</h2><br>
-            <input type="text" id="user" placeholder="Kullanıcı" style="width:100%; padding:10px; margin-bottom:10px;">
-            <input type="password" id="pass" placeholder="Şifre" style="width:100%; padding:10px; margin-bottom:10px;">
-            <button onclick="login()" style="width:100%; padding:10px; background:blue; color:white; border:none;">GİRİŞ</button>
+            <input id="u" placeholder="Kullanıcı" style="width:100%; padding:10px; margin-bottom:10px;"><br>
+            <input id="p" type="password" placeholder="Şifre" style="width:100%; padding:10px; margin-bottom:10px;"><br>
+            <button onclick="check()" style="width:100%; padding:10px; background:blue; color:white; border:none;">GİRİŞ</button>
         </div>
     </div>
 
-    <div id="app-container">
-        <nav id="sidebar">
-            <div style="padding:20px;"><h2>AAD BANKACILIK</h2></div>
-            <ul class="menu">
-                <li><a href="#" onclick="show('dashboard')">Ana Panel</a></li>
-                <li><a href="#" onclick="show('cash-page')">Nakit İşlemleri</a></li>
-                <li><a href="#" onclick="show('card-page')">Kart İşlemleri</a></li>
-                <li><a href="#" onclick="handleLogout()" style="color:red;">Çıkış Yap</a></li>
-            </ul>
-        </nav>
-        <main id="main-content">
-            <div id="dashboard" class="page active">
-                <div class="card"><h3>Güncel Bakiye</h3><h1 id="bal">20600 TL</h1></div>
+    <div id="app" class="hidden">
+        <div id="sidebar">
+            <h2>AAD BANKACILIK</h2>
+            <br>
+            <a href="#" class="menu-item" onclick="show('dashboard')">Ana Panel</a>
+            <a href="#" class="menu-item" onclick="show('cash-page')">Nakit İşlemleri</a>
+            <a href="#" class="menu-item" onclick="show('card-page')">Kart İşlemleri</a>
+            <a href="#" class="menu-item" onclick="location.reload()" style="color:red;">Çıkış Yap</a>
+        </div>
+        <div id="content">
+            <div id="dashboard" class="page">
+                <div class="card"><h3>Güncel Bakiye</h3><h1>20.600 TL</h1></div>
             </div>
-            <div id="cash-page" class="page">
-                <div class="card"><h3>Nakit İşlemleri</h3><table id="cash-tab"><thead><tr><th>Tarih</th><th>Tutar</th></tr></thead><tbody></tbody></table></div>
+            <div id="cash-page" class="page hidden">
+                <div class="card"><h3>Nakit İşlemleri</h3><table id="cash-table"><thead><tr><th>Tarih</th><th>Tutar</th></tr></thead><tbody></tbody></table></div>
             </div>
-            <div id="card-page" class="page">
-                <div class="card"><h3>Kart İşlemleri</h3><table id="card-tab"><thead><tr><th>Tarih</th><th>Tutar</th></tr></thead><tbody></tbody></table></div>
+            <div id="card-page" class="page hidden">
+                <div class="card"><h3>Kart İşlemleri</h3><table id="card-table"><thead><tr><th>Tarih</th><th>Tutar</th></tr></thead><tbody></tbody></table></div>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
-        function login() {
-            if(document.getElementById('user').value === "ahmet" && document.getElementById('pass').value === "1234") {
-                sessionStorage.setItem('ok', 'true');
-                location.reload();
-            }
+        function check() {
+            if(document.getElementById('u').value === "ahmet" && document.getElementById('p').value === "1234") {
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
+            } else { alert("Hatalı!"); }
         }
-        function handleLogout() { sessionStorage.removeItem('ok'); location.reload(); }
         function show(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-        if(sessionStorage.getItem('ok') === 'true') {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-container').style.display = 'flex';
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
     </script>
 </body>
